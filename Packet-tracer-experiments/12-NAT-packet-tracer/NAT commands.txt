@@ -1,0 +1,94 @@
+Router>enable
+Router# configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#
+
+Router(config)#hostname R1
+R1#
+
+Now execute the following commands to set IP address in FastEthernet 0/0 interface.
+
+R1(config)#interface FastEthernet0/0
+R1(config-if)#ip address 10.0.0.1 255.0.0.0
+R1(config-if)#no shutdown
+R1(config-if)#exit
+
+
+R1(config)#exit
+R1#show controllers serial 0/0/0
+
+
+R1#configure terminal
+R1(config)#interface Serial0/0/0
+R1(config-if)#ip address 100.0.0.1 255.0.0.0
+R1(config-if)#clock rate 64000
+R1(config-if)#bandwidth 64
+R1(config-if)#no shutdown
+R1(config-if)#exit
+R1(config)#
+
+Router#configure terminal 
+
+Router(config)#interface serial 0/0/0 
+
+Router(config-if)#ip address 100.0.0.1 255.0.0.0
+Router(config-if)#clock rate 64000
+Router(config-if)#bandwidth 64
+Router(config-if)#no shutdown 
+Router(config-if)#exit
+
+Initial IP configuration in R2
+Router>enable
+Router#configure terminal
+Router(config)#hostname R2
+R2(config)#interface FastEthernet0/0
+R2(config-if)#ip address 192.168.1.1 255.255.255.0
+R2(config-if)#no shutdown
+R2(config-if)#exit
+R2(config)#interface Serial0/0/0
+R2(config-if)#ip address 100.0.0.2 255.0.0.0
+R2(config-if)#no shutdown
+R2(config-if)#exit
+R2(config)#
+
+Router(config)#ip nat inside source static 10.0.0.10 50.0.0.10
+
+Following command will define interface Fa0/0 as inside local.
+Router(config-if)#ip nat inside
+
+Following command will define interface Serial0/0/0 as inside global.
+Router(config-if)#ip nat outside
+
+R1 Static NAT Configuration
+R1(config)#ip nat inside source static 10.0.0.10 50.0.0.10
+R1(config)#interface FastEthernet 0/0
+R1(config-if)#ip nat inside
+R1(config-if)#exit
+R1(config)#
+R1(config)#interface Serial 0/0/0
+R1(config-if)#ip nat outside
+R1(config-if)#exit
+
+R1(config)#ip nat inside source static 10.0.0.20 50.0.0.20
+R1(config)#ip nat inside source static 10.0.0.30 50.0.0.30
+
+R2 Static NAT Configuration
+R2(config)#ip nat inside source static 192.168.1.10 200.0.0.10
+R2(config)#interface FastEthernet 0/0
+R2(config-if)#ip nat inside
+R2(config-if)#exit
+R2(config)#
+R2(config)#interface Serial 0/0/0
+R2(config-if)#ip nat outside
+R2(config-if)#exit
+
+Configure static routing in R1
+R1(config)#ip route 200.0.0.0 255.255.255.0 100.0.0.2
+Configure static routing in R2
+R2(config)#ip route 50.0.0.0 255.0.0.0 100.0.0.1
+
+To test this setup click Laptop0 and Desktop and click Command Prompt.
+
+Run ipconfig command.
+Run ping 200.0.0.10 command.
+Run ping 192.168.1.10 command

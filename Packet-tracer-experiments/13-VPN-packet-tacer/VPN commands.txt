@@ -1,0 +1,96 @@
+CONFIGURATION ON ROUTER R1:
+
+Router>enable
+Router#config t
+Router(config)#host r1
+r1(config)#int fa0/0
+r1(config-if)#ip add 192.168.1.1 255.255.255.0 
+r1(config-if)#no shut
+r1(config-if)#exit
+r1(config)#int fa0/1
+r1(config-if)#ip address 1.0.0.1 255.0.0.0
+r1(config-if)#no shut
+
+CONFIGURATION ON ROUTER R2:
+
+Router>enable
+Router#config t
+Router(config)#host r2
+r2(config)#int fa0/0
+r2(config-if)#ip add 1.0.0.2 255.0.0.0
+r2(config-if)#no shut
+r2(config-if)#exit
+r2(config)#int fa0/1
+r2(config-if)#ip add 2.0.0.1 255.0.0.0
+r2(config-if)#no shut
+
+CONFIGURATION ON ROUTER R3:
+Router>enable
+Router#config t
+Router(config)#host r3
+r3(config)#int fa0/0
+r3(config-if)#ip add 2.0.0.2 255.0.0.0
+r3(config-if)#no shut
+r3(config-if)#exit
+r3(config)#int fa0/1
+r3(config-if)#ip add 192.168.2.1 255.255.255.0
+r3(config-if)#no shut
+
+DEFAULT ROUTING CONFIGURATION ON ROUTER R1:
+r1>enable
+r1#config t
+Enter configuration commands, one per line. End with CNTL/Z.
+r1(config)#ip route 0.0.0.0 0.0.0.0 1.0.0.2
+r1(config)#
+
+DEFAULT ROUTING CONFIGURATION ON ROUTER r3:
+r3>enable
+r3#config t
+Enter configuration commands, one per line. End with CNTL/Z.
+r3(config)#ip route 0.0.0.0 0.0.0.0 2.0.0.1
+r3(config)#
+
+NOW CHECK THE CONNECTION BY PINGING EACH OTHER.
+First we go to router r1 and ping with router r3:
+
+r1#ping 2.0.0.2
+
+Now we go to router r3 and test network by pinging router r1 interface.
+r3#ping 1.0.0.1
+
+NOW CREATE VPN TUNNEL between  R1 and R3:
+ 
+
+FIRST CREATE A VPN TUNNEL ON ROUTER R3:
+r1#config t
+r1(config)#interface tunnel 10
+r1(config-if)#ip address 172.16.1.1 255.255.0.0
+r1(config-if)#tunnel source fa0/1
+r1(config-if)#tunnel destination 2.0.0.2
+r1(config-if)#no shut
+
+NOW CREATE A VPN TUNNEL ON ROUTER R3:
+r3#config t
+r3(config)#interface tunnel 100
+r3(config-if)#ip address 172.16.1.2 255.255.0.0
+r3(config-if)#tunnel source fa0/0
+r3(config-if)#tunnel destination 1.0.0.1
+r3(config-if)#no shut
+
+Now test communication between these two routers again by pinging eah other:
+r1#ping 172.16.1.2
+r1#
+r3#ping 172.16.1.1
+
+
+Now Do routing for created VPN Tunnel on Both Router R and R3:
+r1(config)#ip route 192.168.2.0 255.255.255.0 172.16.1.2
+r3(config)#ip route 192.168.1.0 255.255.255.0 172.16.1.1
+
+TEST VPN TUNNEL CONFIGURATION:
+r1#show interfaces Tunnel 10
+r3#show interface Tunnel 100
+
+PC>ipconfig
+PC>ping 192.168.1.2
+PC>tracert 192.168.1.2
